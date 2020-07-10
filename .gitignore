@@ -8,3 +8,5 @@ python/optimization_book.egg-info/PKG-INFO
 python/optimization_book.egg-info/SOURCES.txt
 *.txt
 python/build/lib/optimization_book/exceptions.py
+python/build/lib/optimization_book/__init__.py
+python/build/lib/optimization_book/equations.py
