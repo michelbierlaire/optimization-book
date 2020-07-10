@@ -1,0 +1,9 @@
+c = [1, -2]' ;
+A = [-4, 6 ; 1, 1] ;
+b = [5, 5]';
+lb =[2,0]';
+ub=[ 1000,2] ;
+ctype= "UU" ;
+vartype = "CC";
+sense=1 ;
+[xmin, fmin, status, extra] = glpk (c, A, b, lb, ub, ctype, vartype, sense)
