@@ -1,0 +1,9 @@
+
+notebooks/.ipynb_checkpoints/equations-checkpoint.ipynb
+notebooks/.ipynb_checkpoints/tmp-checkpoint.ipynb
+notebooks/tmp.ipynb
+python/dist/optimization_book-0.1-py3.8.egg
+python/optimization_book.egg-info/dependency_links.txt
+python/optimization_book.egg-info/PKG-INFO
+python/optimization_book.egg-info/SOURCES.txt
+*.txt
