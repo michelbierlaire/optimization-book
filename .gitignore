@@ -7,3 +7,4 @@ python/optimization_book.egg-info/dependency_links.txt
 python/optimization_book.egg-info/PKG-INFO
 python/optimization_book.egg-info/SOURCES.txt
 *.txt
+python/build/lib/optimization_book/exceptions.py
