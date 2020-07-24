@@ -10,3 +10,4 @@ python/optimization_book.egg-info/SOURCES.txt
 python/build/lib/optimization_book/exceptions.py
 python/build/lib/optimization_book/__init__.py
 python/build/lib/optimization_book/equations.py
+python/build/lib/optimization_book/flycheck_unconstrained.py
