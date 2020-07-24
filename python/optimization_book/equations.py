@@ -67,7 +67,8 @@ def newtonEquationOneVariable(fct, x0, eps, maxiters=100):
     return None, iters, f'Maximum number of iterations reached: {maxiters}'
 
 def newtonSeveralVariables(fct, x0, eps, maxiters=100):
-    """
+    """Algorithm 7.3: Newton's method: n variables
+    
     :param fct: function that returns the value of the function and its Jacobian
     :type fct: function
 
