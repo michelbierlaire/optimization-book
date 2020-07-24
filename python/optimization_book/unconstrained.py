@@ -22,8 +22,53 @@ def quadraticDirect(Q, b):
     """
     L = la.cholesky(Q).T
     y = la.solve_triangular(L, -b, lower=True)
-    solution = la.solve_triangular(L.T,y,lower=False)
+    solution = la.solve_triangular(L.T, y, lower=False)
     return solution
+
+def conjugateGradient(Q, b, x0):
+    """ Algorithm 9.2: conjugate gradient method to solve the problem
+
+    .. math:: \\min_x \\frac{1}{2} x^T Q x + b^T x.
+
+    :param Q: symmetric and positive definite matrix n x n
+    :type Q: np.array 2D
+
+    :param b: vector of size n
+    :type b: np.array 1D
+
+    :param x0: starting point for the iterations.
+    :type x0: np.array 1D
+
+    :return: minimum of the quadratic function, and details of the iterations:
+
+           - the current iterate xk
+           - the gradient gk
+           - the direction dk
+           - the step alphak
+           - the step betak
+
+    :rtype: np.array 1D, list([np.array 1D, np.array 1D, np.array 1D, float, float])
+    """
+    n = len(x0)
+    xk = x0
+    gk = Q @ xk + b
+    iters = list()
+    dk = -gk
+    betak = 0
+    for _ in range(n):
+        denom = np.inner(dk, Q @ dk)
+        if denom <= 0:
+            raise ValueError('The matrix must be positive definite')
+        alphak = - np.asscalar(dk.T @ gk) / denom
+        iters.append([xk, gk, dk, alphak, betak])
+        xk = xk + alphak * dk
+        gkp1 = Q @ xk + b
+        betak = np.inner(gkp1, gkp1) / np.inner(gk, gk)
+        dk = -gkp1 + betak * dk
+        gk = gkp1
+    iters.append([xk, gk, dk, alphak, betak])
+    return xk, iters
+
 
 def newtonLocal(fct, x0, eps, maxiter=100):
     """Algorithm 10.1: Newton's local method
@@ -69,6 +114,56 @@ def newtonLocal(fct, x0, eps, maxiter=100):
 
     if np.linalg.norm(g) <= eps:
         return x, iters, f'Required precision has been reached: {np.linalg.norm(g)} <= {eps}'
+
+    return None, iters, f'Maximum number of iterations reached: {maxiter}'
+
+def newtonLocalQuadratic(fct, x0, eps, cg=False, maxiter=100):
+    """Algorithm 10.2: Newton's local method by quadratic modeling
+
+    :param fct: function that returns the value of the function, its gradient and hessian
+    :type fct: f, g, h = fct(x)
+
+    :param x0: starting point for the algorithm.
+    :type x0: numpy.array
+
+    :param eps: precision to reach.
+    :type eps: float.
+
+    :param cg: if True, use the conjugate gradient algorithm
+    :type cg: bool
+
+    :param maxiter: maximum number of iterations. Default: 100.
+    :type maxiter: int
+
+    :return: x, iters, status where
+
+                 - x is solution found, or None is
+                         unsuccessful,
+                 - iters contains a list of
+                         tuple. For each iteration, the number of the
+                         iteration, the value of x, the value of f and
+                         the value of g, and the value of H
+                 - status constains a message describing the reason why the algorithm stopped.
+    :rtype: float, list(int, np.array 1D, float, np.array 1D, np.array 2D), str
+    """
+    n = len(x0)
+    xk = x0
+    iters = list()
+    f, g, H = fct(xk)
+    iters.append([xk, f, g, H])
+    k = 0
+    while np.linalg.norm(g) > eps and k < maxiter:
+        if cg:
+            d, _ = conjugateGradient(H, g, np.zeros(n))
+        else:
+            d = quadraticDirect(H, g)
+        xk = xk + d
+        f, g, H = fct(xk)
+        iters.append([xk, f, g, H])
+        k += 1
+
+    if np.linalg.norm(g) <= eps:
+        return xk, iters, f'Required precision has been reached: {np.linalg.norm(g)} <= {eps}'
 
     return None, iters, f'Maximum number of iterations reached: {maxiter}'
 
@@ -123,7 +218,7 @@ def preconditionedSteepestDescent(fct, x0, D, eps, maxiter=100):
     return None, iters, f'Maximum number of iterations reached: {maxiter}'
 
 
-def initQuadraticLineSearch(h, delta, maxiter = 100):
+def initQuadraticLineSearch(h, delta, maxiter=100):
     """ Algorithm 11.2: initialization of the exact line search.
 
     :param h: function that returns the value of h
@@ -145,11 +240,11 @@ def initQuadraticLineSearch(h, delta, maxiter = 100):
         raise ValueError(f'The condition {hMiddle} < {hLeft} is not verified.')
     right = 2 * delta
     hRight = h(right)
-    iter = 0
+    k = 0
     while hRight <= hMiddle:
-        iter += 1
-        if iter >= maxiter:
-            raise RuntimeError(f'No suitable values have been found after {iter} '
+        k += 1
+        if k >= maxiter:
+            raise RuntimeError(f'No suitable values have been found after {k} '
                                f'iterations. The function may not be bounded from below')
         left = middle
         hLeft = hMiddle
@@ -173,7 +268,7 @@ def quadraticInterpolation(h, delta, eps):
     """
     if h(delta) >= h(0):
         raise Exception(f'Inappropriate choice of delta: {h(delta)} >= {h(0)}')
-    (a, ha, b, hb ,c , hc) = initQuadraticLineSearch(h, delta)
+    (a, ha, b, hb, c, hc) = initQuadraticLineSearch(h, delta)
     k = 1
     # We store the iterates for future display.
     iters = list()
@@ -186,9 +281,9 @@ def quadraticInterpolation(h, delta, eps):
         if xplus == b:
             # We introduce a perturbation to guarantee the property a < b < c
             if (b - a) < (c - b):
-                xplus =  b + eps / 2.0
+                xplus = b + eps / 2.0
             else:
-                xplus =  b - eps / 2.0
+                xplus = b - eps / 2.0
         hxplus = h(xplus)
         iters.append([a, b, c, xplus, ha, hb, hc, hxplus])
         if xplus > b:
@@ -254,7 +349,7 @@ def goldenSection(h, l, u, eps):
             alpha1 = l + rho * (u - l)
             h1 = h(alpha1)
             alpha2 = u - rho * (u - l)
-            h2 = h(alpha2) ;
+            h2 = h(alpha2)
         elif h1 > h2:
             l = alpha1
             alpha1 = alpha2
@@ -270,9 +365,9 @@ def goldenSection(h, l, u, eps):
         k += 1
         iters.append([l, alpha1, alpha2, u, h1, h2])
     xstar = (l + u) / 2.0
-    return xstar,iters
+    return xstar, iters
 
-def lineSearch(obj, x, d, alpha0, beta1, beta2, lbd = 2):
+def lineSearch(obj, x, d, alpha0, beta1, beta2, lbd=2):
     """Algorithm 11.5: line search
 
     :param obj: function returning the value of the objective function and its gradient.
@@ -303,22 +398,22 @@ def lineSearch(obj, x, d, alpha0, beta1, beta2, lbd = 2):
     if  alpha0 <= 0:
         raise Exception(f'alpha0 is {alpha0} and must be > 0')
     if beta1 <= 0 or beta1 >= 1:
-         raise Exception(f'beta1 = {beta1} must be strictly between 0 and 1')
+        raise Exception(f'beta1 = {beta1} must be strictly between 0 and 1')
     if beta2 >= 1:
-         raise Exception(f'beta2 = {beta2} must be strictly lesser than 1')
+        raise Exception(f'beta2 = {beta2} must be strictly lesser than 1')
     if  beta1 >= beta2:
-        raise Exception(f'Incompatible Wolfe cond. parameters: beta1={beta1} is greater or equal than beta2={beta2}')
+        raise Exception(f'Incompatible Wolfe cond. parameters: beta1={beta1} '
+                        f'is greater or equal than beta2={beta2}')
 
     f, g = obj(x)
     deriv = np.inner(g, d)
     if deriv >= 0:
         raise Exception(f'd is not a descent direction: {deriv} >= 0')
-    i = 0
     alpha = alpha0
     # The lower bound alphal is initialized to 0.
     alphal = 0
-    # The upper bound alphar is initialized to "infinity", that is, the largest floating point number
-    # representable in the machine.
+    # The upper bound alphar is initialized to "infinity", that is,
+    # the largest floating point number representable in the machine.
     alphar = np.finfo(np.float64).max
     finished = False
     iters = list()
@@ -328,7 +423,7 @@ def lineSearch(obj, x, d, alpha0, beta1, beta2, lbd = 2):
         # First Wolfe condition
         if fnew > f + alpha * beta1 * deriv:
             reason = "too long"
-            alphar = alpha ;
+            alphar = alpha
             alpha = (alphal + alphar) / 2.0
         # Second Wolfe condition
         elif np.inner(gnew, d) < beta2 * deriv:
@@ -344,7 +439,7 @@ def lineSearch(obj, x, d, alpha0, beta1, beta2, lbd = 2):
         iters.append([alpha, alphal, alphar, reason])
     return alpha, iters
 
-def steepestDescent(obj, x0, eps, maxiter = 100):
+def steepestDescent(obj, x0, eps, maxiter=100):
     """Algorithm 11.6: steepest descent
 
     :param obj: function returning the value of the objective function and its gradient.
@@ -365,8 +460,8 @@ def steepestDescent(obj, x0, eps, maxiter = 100):
     iters.append([xk, f, np.linalg.norm(g)])
     k = 0
     while np.linalg.norm(g) > eps and k < maxiter:
-        alpha, lsiters = lineSearch(obj, xk, -g, alpha0 = 1.0, beta1 = 1.0e-4, beta2 = 0.99)
-        xk = xk - alpha * g ;
+        alpha, _ = lineSearch(obj, xk, -g, alpha0=1.0, beta1=1.0e-4, beta2=0.99)
+        xk = xk - alpha * g
         f, g = obj(xk)
         k += 1
         iters.append([xk, f, np.linalg.norm(g)])
@@ -407,7 +502,7 @@ def modifiedCholesky(H):
         mineig = min(np.linalg.eigvalsh(R))
     return np.linalg.cholesky(R), tau
 
-def NewtonLineSearch(obj, x0, eps, maxiter=10000):
+def newtonLineSearch(obj, x0, eps, maxiter=10000):
     """Algorithm 11.8: Newton algorithm with line search
     :param obj: function returning the value of the objective function, its gradient and hessian.
     :type obj: f, g, H = fct(x)
@@ -424,13 +519,14 @@ def NewtonLineSearch(obj, x0, eps, maxiter=10000):
         return f, g
 
     xk = x0
-    f, g, H = obj(xk)
+    _, g, H = obj(xk)
     k = 0
     iters = [[xk, None, None, None]]
     while np.linalg.norm(g) > eps and k <= maxiter:
-        f, g, H = obj(xk)
+        _, g, H = obj(xk)
         L, tau = modifiedCholesky(H)
-        d = preconditionedSteepestDescent(L, g)
+        z = la.solve_triangular(L, g, lower=True)
+        d = la.solve_triangular(L.transpose(), -z)
         alpha, _ = lineSearch(objls, xk, d, alpha0=1.0, beta1=1.0e-4, beta2=0.99)
         xk = xk + alpha * d
         k = k + 1
