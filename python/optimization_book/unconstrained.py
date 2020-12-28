@@ -367,7 +367,7 @@ def goldenSection(h, l, u, eps):
     xstar = (l + u) / 2.0
     return xstar, iters
 
-def lineSearch(obj, x, d, alpha0, beta1, beta2, lbd=2):
+def lineSearch(obj, x, d, alpha0, beta1, beta2, lbd=3):
     """Algorithm 11.5: line search
 
     :param obj: function returning the value of the objective function and its gradient.
@@ -416,7 +416,7 @@ def lineSearch(obj, x, d, alpha0, beta1, beta2, lbd=2):
     # the largest floating point number representable in the machine.
     alphar = np.finfo(np.float64).max
     finished = False
-    iters = list()
+    iters = [(alpha, alphal, alphar, '')]
     while not finished:
         xnew = x + alpha * d
         fnew, gnew = obj(xnew)
