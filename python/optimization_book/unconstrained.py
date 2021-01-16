@@ -535,3 +535,22 @@ def newtonLineSearch(obj, x0, eps, maxiter=10000):
     if k == maxiter:
         print(f'Maximum number of iteration {maxiter} reached')
     return opt, iters
+
+def trustRegionIntersection(dc, d, delta):
+    """Find the intersection with the trust region of radius
+    :math:`\delta`, centered at :math:`\hat{x}`, along direction
+    :math:`d`.
+
+    :param dc: :math:
+    Trust region of radius delta, centered at xhat
+    xc in in the trust region. 
+    Define dc = xc - xhat. We have ||dc|| <= delta
+    Consider xd outside of the trust region. 
+    Define dd = xd - xhat. We have ||dd|| > delta
+    Find lbd such that || dc + lbd (dd - dc)|| = delta
+    
+    a = np.inner(d,d)
+    b = 2 * np.inner(dc,d)
+    c = np.inner(dc,dc) - delta ** 2
+    discriminant = b * b - 4.0 * a * c
+    return (- b + np.sqrt(discriminant) ) / (2 * a)
