@@ -1,11 +1,15 @@
 """
 Algorithms from Part III of the book
 Bierlaire (2015) Optimization: Principles and Algorithms. EPFL Press.
+
+Michel Bierlaire
+Fri Dec 10 12:14:54 2021
 """
 
 # pylint: disable=invalid-name
 
 import numpy as np
+
 
 def machineEpsilon():
     """
@@ -16,10 +20,12 @@ def machineEpsilon():
         eps /= 2.0
     return eps
 
+
 def newtonEquationOneVariable(fct, x0, eps, maxiters=100):
     """Algorithm 7.2: Newton's method: one variable
 
-    :param fct: function that returns the value of the function and its derivative
+    :param fct: function that returns the value of the function and
+        its derivative
     :type fct: function
 
     :param x0: starting point for the algorithm.
@@ -39,7 +45,9 @@ def newtonEquationOneVariable(fct, x0, eps, maxiters=100):
                          tuple. For each iteration, the number of the
                          iteration, the value of x, the value of f and
                          the value of g,
-                 - status constains a message describing the reason why the algorithm stopped.
+                 - status constains a message describing the reason
+                       why the algorithm stopped.
+
     :rtype: float, list(int, float, float, float), str
 
     """
@@ -62,14 +70,20 @@ def newtonEquationOneVariable(fct, x0, eps, maxiters=100):
         iters.append([k, x, f, g])
 
     if np.abs(f) <= eps:
-        return x, iters, f'Required precision has been reached: {np.abs(f)} <= {eps}'
+        return (
+            x,
+            iters,
+            f'Required precision has been reached: {np.abs(f)} <= {eps}',
+        )
 
     return None, iters, f'Maximum number of iterations reached: {maxiters}'
 
+
 def newtonSeveralVariables(fct, x0, eps, maxiters=100):
     """Algorithm 7.3: Newton's method: n variables
-    
-    :param fct: function that returns the value of the function and its Jacobian
+
+    :param fct: function that returns the value of the function and
+        its Jacobian
     :type fct: function
 
     :param x0: starting point for the algorithm.
@@ -89,8 +103,11 @@ def newtonSeveralVariables(fct, x0, eps, maxiters=100):
                          tuple. For each iteration, the number of the
                          iteration, the value of x, the value of f and
                          the value of g,
-                 - status constains a message describing the reason why the algorithm stopped.
+                 - status constains a message describing the reason
+                   why the algorithm stopped.
+
     :rtype: float, list(int, np.array 1D, np.array 1D, np.array 2D), str
+
     """
     k = 0
     x = x0
@@ -104,11 +121,16 @@ def newtonSeveralVariables(fct, x0, eps, maxiters=100):
             x = x + d
         except np.linalg.LinAlgError as e:
             message = f'Numerical issue encountered in iteration {k}: {e}'
-            return None, message
+            return None, iters, message
         f, J = fct(x)
         iters.append([k, x, f, J])
 
     if np.linalg.norm(f) <= eps:
-        return x, iters, f'Required precision has been reached: {np.linalg.norm(f)} <= {eps}'
+        return (
+            x,
+            iters,
+            (f'Required precision has been reached: '
+             f'{np.linalg.norm(f)} <= {eps}'),
+        )
 
     return None, iters, f'Maximum number of iterations reached: {maxiters}'
