@@ -27,10 +27,13 @@ def tr_method(the_dl):
     return 'Dogleg' if the_dl else 'Trunc. CG'
 
 
+# Retrieve the default values of the parameters for the algorithm
 signature = inspect.signature(unc.newtonTrustRegion)
-delta0 = signature.parameters['delta0'].default
-dl = signature.parameters['dl'].default
+default_delta0 = signature.parameters['delta0'].default
+default_dl = signature.parameters['dl'].default
 
+delta0 = default_delta0
+dl = default_dl
 print(f'*** Initial radius of the TR: {delta0}, with {tr_method(dl)}')
 x0 = np.array([1, 1])
 sol, iters = unc.newtonTrustRegion(ex0508, x0)
@@ -79,7 +82,7 @@ plt.show()
 
 
 delta0 = 1
-dl = signature.parameters['dl'].default
+dl = default_dl
 print(f'*** Initial radius of the TR: {delta0}, with {tr_method(dl)}')
 x0 = np.array([1, 1])
 sol, iters = unc.newtonTrustRegion(ex0508, x0, delta0=delta0)
@@ -126,7 +129,7 @@ plt.plot(xiter, yiter, linewidth=5, color='r')
 plt.show()
 
 
-delta0 = signature.parameters['delta0'].default
+delta0 = default_delta0
 dl = False
 print(f'*** Initial radius of the TR: {delta0}, with {tr_method(dl)}')
 x0 = np.array([1, 1])
@@ -167,7 +170,7 @@ plt.show()
 plt.title('Figure 12.5 (b), page 307')
 xlist = np.linspace(0.5, 1.2, 1000)
 ylist = np.linspace(0.5, 4, 1000)
-X, Y = np.meshgrid(xlist, ylist) 
+X, Y = np.meshgrid(xlist, ylist)
 Z = theFunctionToPlot(X, Y)
 plt.contour(X, Y, Z, 15)
 xiter = [iters[k][0].item(0) for k in range(len(iters))]
