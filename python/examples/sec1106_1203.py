@@ -1,8 +1,8 @@
 """
- Rosenbrock example from Section 11.6
+ Rosenbrock example from Sections 11.6 and 12.3
 
 Michel Bierlaire
-Fri Dec 10 13:22:16 2021
+Sun Dec 12 13:49:38 2021
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -103,7 +103,7 @@ plotRosenbrockIters(
 
 x0 = np.array([-1.5, 1.5])
 sol, iters = unc.newtonLineSearch(exRosenbrock, x0, eps=1.0e-7)
-print(f'Newton and linesearch descent: solution: {sol}')
+print(f'Newton and linesearch: solution: {sol}')
 print(f'Newton and linesearch: number of iterations: {len(iters)}')
 
 plotRosenbrockIters(
@@ -111,4 +111,18 @@ plotRosenbrockIters(
 )
 plotRosenbrockIters(
     'Figure 11.20 (b): Newton and linesearch', iters, -0.5, 1.1, -0.1, 1.1
+)
+
+# Solving Rosenbrock with Newton and trust region
+
+x0 = np.array([-1.5, 1.5])
+sol, iters = unc.newtonTrustRegion(exRosenbrock, x0, eps=1.0e-7)
+print(f'Newton and trus region: solution: {sol}')
+print(f'Newton and trus region: number of iterations: {len(iters)}')
+
+plotRosenbrockIters(
+    'Figure 12.6 (a): Newton and trust region', iters, -1.6, 1.1, -1, 2.22
+)
+plotRosenbrockIters(
+    'Figure 12.6 (b): Newton and trust region', iters, -0.5, 1.1, -0.1, 1.1
 )
