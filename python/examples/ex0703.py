@@ -16,3 +16,15 @@ def ex0703(x):
     :rtype: float, float
     """
     return x ** 2 - 2, 2 * x
+
+def ex0703_only_f(x):
+    """Example function
+
+    :param x: variable
+    :type x: float
+
+    :return: F(x)
+    :rtype: float
+    """
+    f, _ = ex0703(x)
+    return f

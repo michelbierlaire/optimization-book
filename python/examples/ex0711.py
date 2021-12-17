@@ -25,3 +25,16 @@ def ex0711(x):
     J22 = 3 * x[1] * x[1]
     J = np.array([[J11, J12], [J21, J22]])
     return f, J
+
+
+def ex0711_only_f(x):
+    """Example function
+
+    :param x: variable
+    :type x: float
+
+    :return: F(x)
+    :rtype: np.array
+    """
+    f, _ = ex0711(x)
+    return f
