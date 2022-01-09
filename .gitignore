@@ -31,3 +31,4 @@ python/notebooks/.ipynb_checkpoints/08 - Quasi Newton methods-checkpoint.ipynb
 python/notebooks/.ipynb_checkpoints/12 - Trust region-checkpoint.ipynb
 python/notebooks/.ipynb_checkpoints/12 - Trust region-checkpoint.ipynb
 python/notebooks/.ipynb_checkpoints/12 - Trust region-checkpoint.ipynb
+python/build/lib/optimization_book/flycheck_networks.py
